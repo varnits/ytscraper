@@ -1,9 +1,9 @@
 var fetchVideoInfo = require('youtube-info');
 var streamingS3 = require('streaming-s3');
-var ypi = require('youtube-channel-videos');
 var ytdl = require('ytdl-core');
-var fetchVideoInfo = require('youtube-info');
 var mysql = require('mysql');
+var request = require("request");
+
 //  To fetch values from Lambda env
 //  var s3accesskeyid=process.env.ACCESSKEYID;
 //  var secretkey=process.env.SECRETACCESSKEY;
@@ -37,6 +37,8 @@ var i=0;
 var dl=0;
 var url='';
 var last=0;
+var count=0;
+var count2=0;
 
 // Youtube channel to scrap
 var channelId='UCoy4nghiBTTuXKCqT3-TpXA';
@@ -57,20 +59,49 @@ exports.handler =  (event, context, callback) => {
     con.connect(function(err) {
       if (err) throw err;
     console.log("Connected!");
-    looper();
+  //  looper();
   });
+//videoids via pattern matching
+//returns html code in body
 
-// Fetch videos of the channel
-ypi.channelVideos(youtubeapikey, channelId, function(channelItems) {
-    data=channelItems;
-    console.log(data.length);
-    for (var item of data) {
-        vidir=item.id.videoId;
-        vidarr.push(vidir);
-        console.log(vidir);}
-        looper();
-    });
+request({
+  uri: "https://www.youtube.com/channel/"+channelId+"/videos",
+}, function(error, response, body) {
+    str=body;
+    var index1=0;
+    var index2=10;
+    var ss=str;
+    var key='data-context-item-id="';
+    var index3;
+
+    //loop runs till all videoids are sent to array vidarr
+
+   while (ss.includes(key)!=-1 && index1+8<=index2){
+      index1=ss.indexOf(key)+key.length;
+      index2=index1+ss.substring(index1).indexOf("data-visibility-tracking");
+      index3=index1 + ss.substring(index1,index1+20).indexOf("\"");
+      vidarr.push(ss.substring(index1,index3));
+      ss=ss.substring(index2);
+    }
+    vidarr.pop();
+    console.log(vidarr.length);
+    looper();
+});
 }
+//
+// Fetch videos of the channel
+// ypi.channelVideos(youtubeapikey, channelId, function(channelItems) {
+//     data=channelItems;
+//     console.log(data.length);
+//     for (var item of data) {
+//         vidir=item.id.videoId;
+//         vidarr.push(vidir);
+//         console.log(vidir);
+//       }
+//       vidarr.push('4PL3-hdOeNs');
+//         looper();
+//     });
+//}
 
 // Loop over the videos and find out missing videos to download
 function looper(){
@@ -87,6 +118,7 @@ function looper(){
             }
             else {
                 arr.push(1);
+             count++;
                 console.log(result);
              }
              if(arr.length==vidarr.length){
@@ -119,17 +151,18 @@ function download(dl){
              , {accessKeyId: s3accesskeyid, secretAccessKey: secretkey},   
            {
            Bucket: bucketname,
-              Key: channelId+"-11"+vidarr[dl],
+              Key: channelId+"-"+vidarr[dl],
                ContentType: 'video/mp4',
              },
              (err, res, stats) => {
                if (err) console.log(err);
                sql="INSERT INTO videoList (videoId,downloadLink) VALUES ("+"'"+vidarr[dl]+"','s3://videobucketforshutapp/"+channelId+"-11"+vidarr[dl]+"')";
                con.query(sql, function (err, result) {
-                console.log(sql);
+                //console.log(sql);
                     if (err) throw err;
+                    count2++;
                     // update metadata after the last video is downloaded                     
-                    if (dl==last){
+                    if (count==count2){
                       metadataupdate();
                     }
                console.log('success', stats);
@@ -140,7 +173,7 @@ function download(dl){
 
   //update metadata in mysql table     
 function metadataupdate(){
-         
+        
        for (var it of vidarr){
          
         fetchVideoInfo(it).then(function (videoInfo) {
