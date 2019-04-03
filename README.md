@@ -2,8 +2,8 @@
 Problem Statement-
 Create a crawler which scraps certain youtube channels regularly and downloads the videos from the channel. You have to setup this crawler in the cloud service of your choice(AWS/GCP etc) . You have to download the videos in the cloud storage of your choice. Additionally you have to scrap the metadata of video and store it in the sql table.
 
-Sol.- ytscraper is a completely serverless application built with aws lambda, aws rds(mysql), aws S3 bucket and some npm modules for nodejs youtube-channel-videos(https://www.npmjs.com/package/youtube-channel-videos),ytdl-core(https://www.npmjs.com/package/ytdl-core),
-streaming-S3(https://www.npmjs.com/package/streaming-s3), mysql(https://www.npmjs.com/package/mysql) and aws-sdk(https://www.npmjs.com/package/aws-sdk).
+Sol.- ytscraper is a completely serverless application built with aws lambda, aws rds(mysql), aws S3 bucket and some npm modules for nodejs ytdl-core(https://www.npmjs.com/package/ytdl-core),
+streaming-S3(https://www.npmjs.com/package/streaming-s3) and mysql(https://www.npmjs.com/package/mysql), the scraper uses 'request' and pattern matching to get video-ids of a channel.
 index.js is a lambda function and awsmysqlcon.js is a helper file for viewing the table.
 
 Lambda arn- arn:aws:lambda:us-east-1:873041759604:function:youtubetos3
