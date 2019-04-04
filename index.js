@@ -5,23 +5,18 @@ var mysql = require('mysql');
 var request = require("request");
 
 //  To fetch values from Lambda env
-//  var s3accesskeyid=process.env.ACCESSKEYID;
-//  var secretkey=process.env.SECRETACCESSKEY;
-//  var hostname=process.env.HOST;
-//  var username=process.env.USERNAME;
-//  var password=process.env.PASSWORD; 
-//  var database=process.env.DATABASE;  
+ var s3accesskeyid=process.env.ACCESSKEYID;
+ var secretkey=process.env.SECRETACCESSKEY;
+ var hostname=process.env.HOST;
+ var username=process.env.USERNAME;
+ var password=process.env.PASSWORD; 
+ var database=process.env.DATABASE;  
 
 // Access key and secret for S3 bucket
-var s3accesskeyid='AKIAJWTWERQZR52ZWUEQ';
-var secretkey='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';
+
 var bucketname='videobucketforshutapp';
 
 // RDS details and access credentials
-var hostname='metadatachannel.cdz95obhjeq6.us-east-1.rds.amazonaws.com';
-var username="varnit12";
-var password='password'; 
-var database='channelwisevideo';
 
 // Youtube API key
 var youtubeapikey='AIzaSyD4sRwSYx5oMqxkqFHDTOe2-RQliO19cyg';
